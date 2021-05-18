@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mnozenie_Macierzy</title>
+        <style>
+            body
+            {
+                background-color: antiquewhite;
+            }
+
+            .kontent
+            {
+                width: 800px;
+                height: auto;
+                padding: 10px;
+                background-color: lightsteelblue;
+                border-radius: 10px;
+                border: 5px solid black;
+                color:black;
+                box-shadow: 5px 5px 5px 5px rgb(145, 145, 145);
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            input
+            {
+                border-radius: 5px;
+                text-align: center;
+            }
+
+            button
+            {
+                width: 100%;
+                border-radius: 5px;
+            }
+        </style>
+        <script>
+
+            // Funkcje pomocnicze: ---------------------------]
+            function getObj(ID)
+            {
+                return document.getElementById(ID);
+            }
+
+            function getValue(ID)
+            {
+                return document.getElementById(ID).value;
+            }
+
+            function createArray(length) 
+            {
+                var data = new Array(length || 0), i = length;
+                if (arguments.length > 1)
+                {
+                    var args = Array.prototype.slice.call(arguments, 1);
+                    while(i--)
+                    {
+                        data[length-1 - i] = createArray.apply(this, args);
+                    }
+                }
+                return data;
+            }
+            //------------------------------------------------]
+
+            // Funkcje główne:
+
+            var rows_A;
+            var columns_A_Rows_B;
+            var columns_B;
+            var pressed=0;
+
+            function Generate()
+            {
+                // 1. Uzyskanie informacji na temat wielkości.
+                rows_A=getValue("KA");
+                columns_A_Rows_B=getValue("KAWB");
+                columns_B=getValue("WB");
+
+                if(rows_A!="" && columns_A_Rows_B!="" && columns_B!="" && pressed==0)
+                {
+                    // 2. Tworzenie macierzy A.
+                    pressed=1;
+                    getObj("kontent").innerHTML+="<p><b>Macierz A:</b><p>";
+                    
+                    for(let i=0;i<rows_A;i++)
+                    {
+                        for(let j=0;j<columns_A_Rows_B;j++)
+                        {
+                            var ID='A'+i+''+j;
+                            getObj("kontent").innerHTML+=ID+"<input type='text' id='"+ID+"'/>";
+                        }
+                        getObj("kontent").innerHTML+="<br>";
+                    }
+
+                    // 3. Tworzenie macierzy B.
+                    getObj("kontent").innerHTML+="<p><b>Macierz B:</b><p>";
+
+                    for(let i=0;i<columns_A_Rows_B;i++)
+                    {
+                        for(let j=0;j<columns_B;j++)
+                        {
+                            var ID='B'+i+''+j;
+                            getObj("kontent").innerHTML+=ID+"<input type='text' id='"+ID+"'/>"; 
+                        }
+                        getObj("kontent").innerHTML+="<br>";
+                    }
+
+                    // 4. Tworzenie przycisku do obliczania iloczynu macierzy.
+                    getObj("kontent").innerHTML+="<br>";
+                    getObj("kontent").innerHTML+="<button id='Oblicz'>Oblicz</button>";
+                    td=document.getElementById("Oblicz");
+                    td.onclick=new Function("Calc()");
+
+                    // 5. Wypisanie wcześniejszych wartości.
+                    getObj("KA").value=rows_A;
+                    getObj("KAWB").value=columns_A_Rows_B;
+                    getObj("WB").value=columns_B;
+                }
+            }
+
+
+            function Calc()
+            {
+                // 1. Zapisywanie danych macierzy A.
+                var MA = createArray(rows_A,columns_A_Rows_B);
+                for (var i = 0; i < MA.length; i++)
+                {
+                    for(var j=0;j<columns_A_Rows_B;j++)
+                    {
+                        var ID='A'+i+''+j;
+                        MA[i][j]=parseInt(getValue(ID));
+                    }
+                }
+
+                // 2. Zapisywanie danych macierzy B.
+                var MB = createArray(columns_B,columns_A_Rows_B);
+                for (var i = 0; i < MB.length; i++)
+                {
+                    for(var j=0;j<columns_B;j++)
+                    {
+                        var ID='B'+i+''+j;
+                        MB[i][j]=parseInt(getValue(ID));
+                    }
+                }
+
+                // 3. Wypisywanie macierzy wynikowej.
+                getObj("kontent").innerHTML+="<p><b>Macierz wynikowa:</b><p>";
+                for(let i=0;i<rows_A;i++)
+                {
+                    for(let j=0;j<columns_B;j++)
+                    {
+                        var ID='W'+i+''+j;
+                        getObj("kontent").innerHTML+=ID+"<input type='text' id='"+ID+"' readonly/>"; 
+                    }
+                    getObj("kontent").innerHTML+="<br>";
+                }
+
+                // 4. Uzupełnianie macierzy A swoimi wartościami.
+                for (var i = 0; i < rows_A; i++)
+                {
+                    for(var j=0;j<columns_A_Rows_B;j++)
+                    {
+                        var ID='A'+i+''+j;
+                        getObj(ID).value=MA[i][j];
+                    }
+                }
+
+                // 5. Uzupełnianie macierzy B swoimi wartościami.
+                for (var i = 0; i < columns_A_Rows_B; i++)
+                {
+                    for(var j=0;j<columns_B;j++)
+                    {
+                        var ID='B'+i+''+j;
+                        getObj(ID).value=MB[i][j];
+                    }
+                }
+
+
+                // 6. Utworzenie macierzy wynikowej.
+                var MW = createArray(rows_A,columns_B);
+                for (let i = 0; i < rows_A; i++)
+			    {
+                    for(let x=0;x<columns_B;x++)
+                    {
+                        var ID_W='W'+i+''+x;
+                        var sum=0;
+                        for(let j=0;j<columns_A_Rows_B;j++)
+                        {
+                            var ID_A='A'+i+''+j;
+                            var ID_B='B'+j+''+x;
+
+                            sum+=getObj(ID_A).value*getObj(ID_B).value;
+                        }
+                        MW[i][x]=sum;
+                    }
+			    }
+                
+                // 7. Uzupełnianie macierzy wynikowej swoimi wartościami.
+                for (let i = 0; i < rows_A; i++)
+			    {
+                    for (let j = 0; j < columns_B; j++)
+                    {
+                        var ID='W'+i+''+j;
+                        getObj(ID).value=MW[i][j];
+                    }
+			    }
+                
+                // 8. Wypisanie wcześniejszych wartości.
+                getObj("KA").value=rows_A;
+                getObj("KAWB").value=columns_A_Rows_B;
+                getObj("WB").value=columns_B;
+            }
+        </script>
+    </head>
+    <body>
+        <div class="kontent" id="kontent">
+            <p align="center"><b>Zad. 5:</b>Wprowadz dane</p>
+            <p>Liczba wierszy macierzy A: <input type="text" id="KA"/></p>
+            <p>Liczba kolumn macierzy A oraz wierszy macierzy B: <input type="text" id="KAWB"/></p>
+            <p>Liczba kolumn macierzy B: <input type="text" id="WB"/></p>
+            <button onclick="Generate()">Utworz</button>
+        </div>
+    </body>
+</html>

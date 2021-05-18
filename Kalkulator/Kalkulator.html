@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Kalkulator</title>
+        <style>
+            body
+            {
+                animation: TLO;
+                animation-duration: 10s;
+                background-color: rgb(239, 251, 255);
+            }
+
+            .kontent
+            {
+                width: 623.5px;
+                border-radius: 5px;
+                background-color: rgb(0, 0, 0);
+                padding: 5px;
+                margin-left: 10px;
+                margin-top: 10px;
+                animation: INTRO;
+                animation-duration: 2s;
+                animation-iteration-count: 1;
+            }
+            
+            button
+            {
+                width:100px;
+                height: 50px;
+                font-family: 'Times New Roman', Times, serif;
+                font-size: 20.5px;
+                background-color: #ef6eae,;
+                padding: 5px;
+                border: 2px solid rgb(166, 252, 255);
+            }
+
+            #exec
+            {
+                color:red;
+            }
+
+            input
+            {
+                width: 148.5%;
+                font-family: 'Times New Roman', Times, serif;
+                font-size: 30px;
+                height: 50px;
+                text-align: center;
+            }
+
+            button:hover
+            {
+                animation: ROTATE;
+                animation-duration: 1.5s;
+            }
+
+            @keyframes TLO
+            {
+                start
+                {
+                    background-color: bisque;
+                }
+                0%
+                {
+                    background-color: bisque;
+                }
+                100%
+                {
+                    background-color: rgb(239, 251, 255);
+                }
+            }
+
+           @keyframes ROTATE
+           {
+               start
+               {
+                    background-color: white;
+                    border-color: rgb(166, 252, 255);
+               }
+               100%
+               {
+                  background-color: bisque;
+                  border-color: red;
+                  transform:scale(0.99);
+               }
+           }
+
+            @keyframes INTRO
+            {
+                from
+                {
+                    transform:scale(0.5);
+                }
+                to
+                {
+                    transform: scale(1);
+                }
+            }
+        </style>
+        <script>
+
+            function KeyPressed(e)
+            {
+                // Cel: Sprawdz jaki przycis zostal nacisniety.
+
+                // 1. Jezeli jest przycisck [0,9] lub '.' to mozna go wpisac do pola uzytkownika.
+                if((e.which>= 48 && e.which <=57))
+                {
+                    return true;
+                }
+                // 2. Nacisnieto przycisk kropki.
+                else if(e.which == 190 && !usedDot)
+                {
+                    usedDot=true;
+                    return true;
+                }
+                // 4. Jezeli został wciśniety przycisk do usuwania do usuń ostatni znak z pola użytkownika.
+                else if(e.which==8)
+                {
+                    var value=document.getElementById("output").value;
+                    value=value.substring(0,value.length-1);
+                    document.getElementById("output").value=value;
+                }
+                // 5. Zostaly wcisniety znak, ktorego nie nalezy wyswietlic w polu uzytkownika.
+                e.preventDefault();
+            }
+
+            // CELE:
+            // 1. Mozliwosc wpisywanie liczb do pola uzytkownika.
+            // 2. Wykonywanie operacji arytmetycznych np. mnozenie za pomoca przyskow.
+            // 3. Kiedy uzyskamy jakis wynik mozemy dodac mu jedna pozycje i dalej powtarzac to co robilismy wczesniej.
+            // ------------> Pelna dowolność wpisywania danych czy to poprzez klikanie czy wpisywanie.
+
+            // Zmienne pomocnicze:
+            var last=0; // Ostatni operand.
+            var current=0; // Obecny operand.
+            var LAST_RES=0; // Ostatni nie zerowy operand.
+            var state=0; // Tryb przypisywania wartosci.
+            var ope=""; // Operator.
+            var usedDot=false;
+
+            function AddNumber(value)
+            {
+                // Cel: Dodawanie element do pola tekstowego.
+                // 1. Jezeli wartosci to jest kropka (-1) oraz nie uzyto jeszcze kropki to postaw kropke.
+                if(document.getElementById("output").value=="0" && value!=-1)
+                {
+                    return;
+                }
+                else if(value==-1 && !usedDot)
+                {
+                    var tmp=document.getElementById("output").value+"";
+                    tmp+=".";
+                    document.getElementById("output").value=tmp;
+                    usedDot=true;
+                }
+                // 2. Jezeli to nie jest kropka tylko cyfra to wpisz ja do pola uzytkownika.
+                else if(value!=-1)
+                {
+                    document.getElementById("output").value+=value;
+                }
+            }
+
+            function Reset()
+            {
+                // 1. Resetuj wszystkie parametry.
+                last=0;
+                current=0;
+                LAST_RES=0;
+                state=0;
+                ope="";
+                document.getElementById("output").value="";
+            }
+
+            function Operator(value)
+            {
+                // 0. Jezeli zostal klikniety przycisk rowna się a polu użytkownika nic nie ma.
+                if(value=="=" && document.getElementById("output").value=="")
+                {
+                    // 1. Nic nie rób ~ pomiń.
+                }
+                 // 1. Jesli wartosc przesylana jest rowna sie oraz ustawiony jest tryb pierwszego parametru.
+                //    to powtorz wczesniej wykonana czynnosc arytmetyczną.
+                else if(value=="=" && state==0)
+                {
+                    // 1.1 Pobierz liczbe z pola tekstowego.
+                    var value=parseFloat(document.getElementById("output").value);
+                    switch(ope)
+                    {
+                        // 1.2 Wykonaj operacja zgodnia z ostatnim uzytym operatorem.
+                        case "+":
+                            value=value+current;
+                            break;
+                        case "-":
+                            value=current-value;
+                            value*=-1;
+                            break;
+                        case "/":
+                            value=value/current;
+                            break;
+                        case "*":
+                            value=value*current;
+                            break;
+                    }
+                    // 1.3 Wypisz uzyskany wynik na ekranie.
+                    document.getElementById("output").value=value;
+                }
+                // 2. Jezeli jest wlaczony tryb drugiego operandu a uzytkownik znow kliknal operator rozny od rowna się.
+                else if(state==1 && value!="=")
+                {
+                    // 2. 1 Po prostu nic nie rob tak jak w przypadku innych kalkulatorow.
+                }
+                // 3. Jezeli jest ustawiony tryb dla pierwszego operanda to wpisz do niego dane z pola uzytkownika.
+                //    A następnie przełącz tryb dla drugiego operanda.
+                else if(state==0)
+                {
+                    // 3.1 Pobierz wartosc z pola uzytkownika oraz przypisz ja do pierwszego operandu.
+                    last=parseFloat(document.getElementById("output").value);
+
+                    // 3.2 Ustaw pole jako puste.
+                    document.getElementById("output").value=""; 
+
+                    // 3.3 Przejdz do trybu dla drugiego operandu.
+                    state=1;
+
+                    // 3.4 Zapisz operand, który pozniej zostanie uzyty po uzyskaniu drugiego operandu i kliknieciu rowna się.
+                    ope=value;
+                    
+                    // 3.5 Włączenie możliwości dopisania kropki.
+                    usedDot=false;
+                }
+                // 4. Jezeli jest ustawiony tryb dla pierwszego operanda to wpisz do niego dane z pola uzytkownika.
+                //    A nastepnie oblicz wyraznie uzyskane [Pierwszy_Operand][Operator][Drugi_Operand]
+                //    W zaleznosci od uzyskanego operandu.
+                else if(state==1 && value=="=")
+                {
+                    // 4.1 Pobierz wartosc z pola uzytkownika oraz przypisz ja do drugiego operandu.
+                    current=parseFloat(document.getElementById("output").value);
+
+                    // 4.2 Ustaw tryb dla pierwszego operandu.
+                    state=0;
+
+                    // 4.3 Wykonaj operacja arytmetyczną zgodną z użytym operatorem oraz wypisz je rezultat w polu uzytkownika.
+                    switch(ope)
+                    {
+                        case "+":
+                        document.getElementById("output").value=current+last;
+                            break;
+                        case "-":
+                        var value=current-last;
+                        value*=-1;
+                        document.getElementById("output").value=value;
+                            break;
+                        case "/":
+                        document.getElementById("output").value=last/current;
+                            break;
+                        case "*":
+                        document.getElementById("output").value=current*last;
+                            break;
+                    }
+                }
+            }
+            
+            function My_Sqrt()
+            {
+                if(document.getElementById("output").value!="")
+                {
+                    // Cel: Spierwiastkowanie wartosci, ktora jest wpisana w polu uzytkownika oraz wypisanie wyniku tam.
+
+                    // 1. Uzyskanie wartosci z pola uzytkownika.
+                    var value=parseFloat(document.getElementById("output").value);
+
+                    // 2. Spierwiastkowanie wartosci.
+                    value=Math.sqrt(value);
+
+                    // 3. Wypisanie wartosci na ekranie.
+                    document.getElementById("output").value=value;
+                }
+                else
+                {
+                    alert("Puste pole użytkownika!");
+                }
+            }
+
+
+            function Rev()
+            {
+                if(document.getElementById("output").value!="")
+                {
+                    // Cel: Odwrocenie wartosci uzyskanej z pola uzyktownika oraz wypisanie tam jej wyniku.
+
+                    // 1. Uzyskanie wartosci z pola uzytkownika.
+                    var value=parseFloat(document.getElementById("output").value);
+
+                    // 2. Odwrocenie wartosci.
+                    value=1/value;
+
+                    // 3. Wypisanie wartosci na ekranie.
+                    document.getElementById("output").value=value;
+                }
+                else
+                {
+                    alert("Puste pole użytkownika!");
+                }
+            }
+
+            function Up()
+            {
+                if(document.getElementById("output").value!="")
+                {
+                    // Cel: Podniesnie wartosci do potęgi drugiej uzyskanej z pola uzytkownika oraz wypisanie jej tam.
+
+                    // 1. Uzyskanie wartosci z pola uzytkownika.
+                    var value=parseFloat(document.getElementById("output").value);
+
+                    // 2. Podniesienie do potęgi drugiej wartości.
+                    value=Math.pow(value,2);
+
+                    // 3. Wypisanie uzyksanego wyniku w polu uzytkownika.
+                    document.getElementById("output").value=value;
+                }
+                else
+                {
+                    alert("Puste pole użytkownika!");
+                }
+            }
+
+            function Sinus()
+            {
+                if(document.getElementById("output").value!="")
+                {
+                    // Cel: Obliczanie wartosci funkcji trygonometrycznej z użyciem pola użytkownika.
+
+                    // 1. Uyskanie wartosci z pola uzytkownika.
+                    var value=parseFloat(document.getElementById("output").value);
+
+                    // 2. Obliczenie.
+                    value=Math.sin(value);
+
+                    // 3. Wypisanie wartosci na ekranie.
+                    document.getElementById("output").value=value;
+                }
+                else
+                {
+                    alert("Puste pole użytkownika!");
+                }
+            }
+
+            function Cosinus()
+            {
+                if(document.getElementById("output").value!="")
+                {
+                    // Cel: Obliczanie wartosci funkcji trygonometrycznej z użyciem pola użytkownika.
+
+                    // 1. Uyskanie wartosci z pola uzytkownika.
+                    var value=parseFloat(document.getElementById("output").value);
+
+                    // 2. Obliczenie.
+                    value=Math.cos(value);
+
+                    // 3. Wypisanie wartosci na ekranie.
+                    document.getElementById("output").value=value;
+                }
+                else
+                {
+                    alert("Puste pole użytkownika!");
+                }
+            }
+
+            function Tangent()
+            {
+                if(document.getElementById("output").value!="")
+                {
+                    // Cel: Obliczanie wartosci funkcji trygonometrycznej z użyciem pola użytkownika.
+
+                    // 1. Uyskanie wartosci z pola uzytkownika.
+                    var value=parseFloat(document.getElementById("output").value);
+
+                    // 2. Obliczenie.
+                    value=Math.tan(value);
+
+                    // 3. Wypisanie wartosci na ekranie.
+                    document.getElementById("output").value=value;
+                }
+                else
+                {
+                    // 1. Wypisz komunikat o pustym polu.
+                    alert("Puste pole użytkownika!");
+                }
+            }
+
+            function Cotangent()
+            {
+                if(document.getElementById("output").value!="")
+                {
+                    // Cel: Obliczanie wartosci funkcji trygonometrycznej z użyciem pola użytkownika.
+
+                    // 1. Uyskanie wartosci z pola uzytkownika.
+                    var value=parseFloat(document.getElementById("output").value);
+
+                    // 2. Obliczenie.
+                    value=Math.cos(value)/Math.sin(value);
+
+                    // 3. Wypisanie wartosci na ekranie.
+                    document.getElementById("output").value=value;
+                }
+                else
+                {
+                    // 1. Wypisz komunikat o pustym polu.
+                    alert("Puste pole użytkownika!");
+                }
+            }
+
+            function DegToRad()
+            {
+                if(document.getElementById("output").value!="")
+                {
+                    // Cel: Przekonwertowanie przesłanej wartosci w stopniach do radianow.
+
+                    // 1. Uyskanie wartosci z pola uzytkownika.
+                    var value=parseFloat(document.getElementById("output").value);
+
+                    // 2. Obliczenie.
+                    value=value*3.14/180;
+
+                    // 3. Wypisanie wartosci na ekranie.
+                    document.getElementById("output").value=value;
+                }
+                else
+                {
+                    // 1. Wypisz komunikat o pustym polu.
+                    alert("Puste pole użytkownika!");
+                }
+            }
+
+            
+            function RadToDeg()
+            {
+                if(document.getElementById("output").value!="")
+                {
+                    // Cel: Przekonwertowanie przesłanej wartosci w radianach do stopni.
+
+                    // 1. Uyskanie wartosci z pola uzytkownika.
+                    var value=parseFloat(document.getElementById("output").value);
+
+                    // 2. Obliczenie.
+                    value=value*180/3.14;
+
+                    // 3. Wypisanie wartosci na ekranie.
+                    document.getElementById("output").value=value;
+                }
+                else
+                {
+                    // 1. Wypisz komunikat o pustym polu.
+                    alert("Puste pole użytkownika!");
+                }
+            }
+
+            function Euler()
+            {
+                // Wypisanie wartosci stalej Eulera w polu uzytkownika.
+                document.getElementById("output").value=2.71828;
+            }
+
+            function Logarytm2()
+            {
+                if(document.getElementById("output").value!="")
+                {
+                    // Cel: Obliczanie logarytmu o podstawie dwa z wartosci w polu uzytkownika.
+
+                    // 1. Uyskanie wartosci z pola uzytkownika.
+                    var value=parseFloat(document.getElementById("output").value);
+
+                    // 2. Obliczenie.
+                    value=Math.log2(value);
+
+                    // 3. Wypisanie wartosci na ekranie.
+                    document.getElementById("output").value=value;
+                }
+                else
+                {
+                    // 1. Wypisz komunikat o pustym polu.
+                    alert("Puste pole użytkownika!");
+                }
+            }
+
+            function Logarytm10()
+            {
+                if(document.getElementById("output").value!="")
+                {
+                    // Cel: Obliczanie logarytmu o podstawie dziesięć z wartosci w polu uzytkownika.
+
+                    // 1. Uyskanie wartosci z pola uzytkownika.
+                    var value=parseFloat(document.getElementById("output").value);
+
+                    // 2. Obliczenie.
+                    value=Math.log10(value);
+
+                    // 3. Wypisanie wartosci na ekranie.
+                    document.getElementById("output").value=value;
+                }
+                else
+                {
+                    // 1. Wypisz komunikat o pustym polu.
+                    alert("Puste pole użytkownika!");
+                }
+            }
+
+            function LogarytmNaturalny()
+            {
+                if(document.getElementById("output").value!="")
+                {
+                    // Cel: Obliczanie logarytmu o podstawie wartosci stałej Eulera z wartosci w polu uzytkownika.
+
+                    // 1. Uyskanie wartosci z pola uzytkownika.
+                    var value=parseFloat(document.getElementById("output").value);
+
+                    // 2. Obliczenie.
+                    value=Math.log(value);
+
+                    // 3. Wypisanie wartosci na ekranie.
+                    document.getElementById("output").value=value;
+                }
+                else
+                {
+                    // 1. Wypisz komunikat o pustym polu.
+                    alert("Puste pole użytkownika!");
+                }
+            }
+        </script>
+</head>
+    <body>
+        <div class="kontent">
+            <table>
+                <tr>
+                    <td colspan="4">
+                        <input type="text" onkeydown="return KeyPressed(event);" id="output"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td><button onclick="Rev()"><sup>1</sup>&frasl;<sub>x</sub></button></td>
+                    <td><button onclick="My_Sqrt()">&#8730</button></td>
+                    <td><button onclick="Up()">x<sup>2</sup></button></td>
+                    <td><button onclick="Reset()">CE</button></td>
+                    <td><button onclick="Sinus()">sin(x)</button></td>
+                    <td><button onclick="RadToDeg()">RadToDeg</button></td>
+                </tr>
+                <tr>
+                    <td><button onclick="AddNumber(7)">7</button></td>
+                    <td><button onclick="AddNumber(8)">8</button></td>
+                    <td><button onclick="AddNumber(9)">9</button></td>
+                    <td><button onclick="Operator('/')">&#247</button></td>
+                    <td><button onclick="Cosinus()">cos(x)</button></td>
+                    <td><button onclick="Euler()">e</button></td>
+                </tr>
+                <tr>
+                    <td><button onclick="AddNumber(4)">4</button></td>
+                    <td><button onclick="AddNumber(5)">5</button></td>
+                    <td><button onclick="AddNumber(6)">6</button></td>
+                    <td><button onclick="Operator('*')">&#215</button></td>
+                    <td><button onclick="Tangent()">tg(x)</button></td>
+                    <td><button onclick="Logarytm2()">log2(x)</button></td>
+                </tr>
+                <tr>
+                    <td><button onclick="AddNumber(1)">1</button></td>
+                    <td><button onclick="AddNumber(2)">2</button></td>
+                    <td><button onclick="AddNumber(3)">3</button></td>
+                    <td><button onclick="Operator('-')">&#8722</button></td>
+                    <td><button onclick="Cotangent()">ctg(x)</button></td>
+                    <td><button onclick="Logarytm10()">log10(x)</button></td>
+                </tr>
+                <tr>
+                    <td><button onclick="AddNumber(0)">0</button></td>
+                    <td><button onclick="AddNumber(-1)">.</button></td>
+                    <td><button onclick="Operator('=')" id="exec"><b>=</b></button></td>
+                    <td><button onclick="Operator('+')">&#43</button></td>
+                    <td><button onclick="DegToRad()">DegToRad</button></td>
+                    <td><button onclick="LogarytmNaturalny()">ln(x)</button></td>
+                </tr>
+            </table>
+        </div>
+    </body>
+</html>

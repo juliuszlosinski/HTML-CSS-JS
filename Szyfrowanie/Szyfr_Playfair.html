@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Zad.4</title>
+        <style>
+            html
+            {
+                background-color: papayawhip;
+            }
+
+            #kontent
+            {
+                background-color:lightcyan;
+                width: 350px;
+                padding: 5px;
+                border-radius: 5px;
+                border: 5px solid black;
+            }
+
+            input
+            {
+                border-radius: 5px;
+                text-align: center;
+            }
+
+            button
+            {
+                width: 100%;
+            }
+        </style>
+        <script>
+            // Funkcje pomocnicze----------------------------------------------]
+            function createArray(length) 
+            {
+                // Utworz macierz.
+                var data = new Array(length || 0), i = length;
+                if (arguments.length > 1)
+                {
+                    var args = Array.prototype.slice.call(arguments, 1);
+                    while(i--)
+                    {
+                        data[length-1 - i] = createArray.apply(this, args);
+                    }
+                }
+                return data;
+            }
+            //------------------------------------------------------------------]
+
+            function Encrypt()
+            {
+                // 1. Uzyskanie tekstu jawnego.
+                var data=document.getElementById("dane").value;
+
+                // 2. Uzyskanie klucza.
+                var key=document.getElementById("klucz").value;
+
+                if(data!="" && key!="")
+                {
+                    // 3. Czyszczenie wcześniejszego wyniku.
+                    document.getElementById("wynik").value="";
+
+                    // 4. Utworzenie macierzy 5x5.
+                    var columns=5;
+                    var rows=5;
+                    var matrix=createArray(rows,columns);
+
+                    // 5. Wypełnienie macierzy literami.
+                    var usedLetters="";
+                    var index=0;
+                    var alph=65;
+                    data=data.toUpperCase();
+                    key=key.toUpperCase();
+                    for(let i=0;i<rows;i++)
+                    {
+                        for(let j=0;j<columns;j++)
+                        {
+                            if(index<key.length)
+                            {
+                                var letter=key[index];
+                                matrix[i][j]=letter;
+                                index++;
+                            }
+                            else
+                            {
+                                var value=String.fromCharCode(alph);
+                                while(usedLetters.includes(value))
+                                {
+                                    alph++;
+                                    value=String.fromCharCode(alph);
+                                }
+                                matrix[i][j]=value;
+                                alph++;
+                            }
+                        }
+                    }
+
+                    // 6. Tworzenie macierzy z danymi.
+                    var dataT=document.getElementById("dane").value;
+                    dataT=dataT.toUpperCase();
+                    var rows=Math.ceil(dataT.length/2);
+                    var index=0;
+                    var matrixD=createArray(rows,2);
+                    for(let i=0;i<rows;i++)
+                    {
+                        for(let j=0;j<2;j++)
+                        {
+                            if(index>=dataT.length)
+                            {
+                                matrixD[i][j]='Z';
+                            }
+                            else
+                            {
+                                matrixD[i][j]=dataT[index++];
+                            }
+                        }
+                    }
+                    
+                    //  7. Sprawdzanie zaleznosci miedzy parami.
+                    var pos=0;
+                    while(pos<rows)
+                    {
+                        TheSameColumn_1(matrixD[pos],matrix);
+                        TheSameRow_2(matrixD[pos],matrix);
+                        Cross_3(matrixD[pos],matrix);
+                        pos++;
+                    }
+
+                    // 8. Wypisywanie wartosci.
+                    for(let i=0;i<rows;i++)
+                    {
+                        for(let j=0;j<2;j++)
+                        {
+                            document.getElementById("wynik").value+=matrixD[i][j];
+                        }
+                    }
+
+                    // 9. Czyszczenie pol po wykonanych operacjach.
+                    document.getElementById("dane").value="";
+                    document.getElementById("klucz").value="";
+                }
+            }
+
+            function Cross_3(data, matrix)
+            {
+                // 1. Pozycja pierwszego elementu.
+                var i1=-1;
+                var j1=-1;
+
+                // 2. Pozycja drugiego elementu.
+                var i2=-1;
+                var j2=-1;
+
+                // 3. Sprawdzanie czy oba elementy są na liscie.
+                for(let i=0;i<5;i++)
+                {
+                    for(let j=0;j<5;j++)
+                    {
+                        if(matrix[i][j]==data[0])
+                        {
+                            i1=i;
+                            j1=j;
+                        }
+                        else if(matrix[i][j]==data[1])
+                        {
+                            i2=i;
+                            j2=j;
+                        }
+                    }
+                }
+
+                // 4. Nowe wartosci.
+                if(i1!=-1 && i2!=-1)
+                {
+                    if(i1>i2)
+                    {
+                        for(let i=i2;i<5;i++)
+                        {
+                            if(i==i1)
+                            {
+                                data[0]=matrix[i1][i];
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for(let i=i1;i<5;i++)
+                        {
+                            if(i==i2)
+                            {
+                                data[1]=matrix[i2][i];
+                            }
+                        }
+                    }
+                }
+            }
+
+            function TheSameRow_2(data, matrix)
+            {
+                // 1. Pozycja pierwszego elementu.
+                var i1=-1;
+                var j1=-2;
+                
+                // 2. Pozycja drugiego elementu.
+                var i2=-1;
+                var j2=-1;
+
+                // 3. Sprawdzanie czy oba elementy są na liscie.
+                for(let i=0;i<5;i++)
+                {
+                    for(let j=0;j<5;j++)
+                    {
+                        if(matrix[i][j]==data[0])
+                        {
+                            i1=i;
+                            j1=j;
+                        }
+                        else if(matrix[i][j]==data[1])
+                        {
+                            i2=i;
+                            j2=j;
+                        }
+                    }
+                }
+
+                // 4. Jezeli elementy sa w tym samym wierszu.
+                if(i1==i2 && i1!=-1)
+                {
+                    if(j1+1 >= 5)
+                    {
+                        j1=0;
+                    }
+                    else
+                    {
+                        j1++;
+                    }
+                    data[0]=matrix[i1][j1];
+
+                    if(j2+1 >=5)
+                    {
+                        j2=0;
+                    }
+                    else
+                    {
+                        j2++;
+                    }
+                    data[1]=matrix[i2][j2];
+                }
+            }
+
+            function TheSameColumn_1(data, matrix)
+            {
+                // 1. Pozycja pierwszego elementu.
+                var i1=-1;
+                var j1=-2;
+                
+                // 2. Pozycja drugiego elementu.
+                var i2=-1;
+                var j2=-1;
+                
+
+                // 3. Sprawdzanie czy oba elementy są na liscie.
+                for(let i=0;i<5;i++)
+                {
+                    for(let j=0;j<5;j++)
+                    {
+                        if(matrix[i][j]==data[0])
+                        {
+                            i1=i;
+                            j1=j;
+                        }
+                        else if(matrix[i][j]==data[1])
+                        {
+                            i2=i;
+                            j2=j;
+                        }
+                    }
+                }
+
+                // 4. Jezeli elementy sa w macierzy oraz mają wspolna kolumnę.
+                if(j2==j1)
+                {
+                    if(i1!=-1 && i2!=-1)
+                    {
+                        if(i1+1>=5)
+                        {
+                            i1=0;
+                        }
+                        else
+                        {
+                            i1++;
+                            
+                        }
+                        data[0]=matrix[i1][j1];
+
+                        if(i2+1>=5)
+                        {
+                            i2=0;
+                        }
+                        else
+                        {
+                            i2++;
+                        }
+                        data[1]=matrix[i2][j2];
+                    }
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <div id='kontent'>
+            <p align='center'><b>Zad.4: Szyfr Playfair</b></p>
+            <p>Tekst: <input type='text' id='dane'/> </p>
+            <p>Klucz: <input type='text' id='klucz'/> </p>
+            <p>Nowy tekst: <input type='text' id='wynik' readonly></p>
+            <button onclick="Encrypt()">Szyfruj!</button>
+         </div>
+    </body>
+</html>

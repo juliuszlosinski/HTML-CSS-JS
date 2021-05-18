@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Zad.1</title>
+    <style>
+        body
+        {
+            background-color:lightgoldenrodyellow;
+        }
+
+        #kontent
+        {
+            padding: 5px;
+            width: 320px;
+            border-radius: 5px;
+            border: 3px solid rgb(0, 0, 0);
+            left:5px;
+            top:5px;
+            background-color: rgb(122, 217, 255);
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+        input
+        {
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        button
+        {
+            width: 100%;
+            border-radius: 5px;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            background-color:rgb(43, 255, 0);
+        }
+    </style>
+    <script>
+        function Encrypt()
+        {
+            // 1. Uzyskanie ciagu znakow wprowadzonego przez uzytkownika.
+            var data=document.getElementById("INPUT").value;
+
+            // 2. Uzyskanie przesuniecie wprowadzone przez uzytkownika.
+            var delta=document.getElementById("MOV").value;
+
+            if(data!="" && delta!="")
+            {
+                // 3. Utworzenie nowego ciagu znakow.
+                var result="";
+                
+                // 4. Przesuwanie liter z uzyskanego tekstu oraz wpisywanie go do wynikowego ciagu znakow.
+                for(let i=0;i<data.length;i++)
+                {
+                    var c=data.charCodeAt(i)+parseInt(delta);
+                    var nc=String.fromCharCode(c);
+                    result+=nc;
+                }
+
+                // 5. Wypisywanie wartosci na ekranie.
+                document.getElementById("OUTPUT").value=result;
+                document.getElementById("MOV").value="";
+                document.getElementById("INPUT").value="";
+            }
+        }
+    </script>
+</head>    
+<body>
+    <div id='kontent'>
+    <p align='center'><b>Zad. 1: Szyfr Cezara</b></p>
+    <p>Tekst: <input type='text' id='INPUT'/> </p>
+    <p>Przesuniecie: <input type='text' id='MOV'/> </p>
+    <p>Nowy tekst: <input type='text' id='OUTPUT' readonly/></p>
+    <button onclick="Encrypt()">Szyfruj!</button>
+    </div>
+</body>
+</html>

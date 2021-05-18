@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Zad.2</title>
+        <style>
+            html
+            {
+                background-color:mistyrose;
+            }
+
+            #content
+            {
+                padding: 5px;
+                border-radius: 5px;
+                border: 5px solid black;
+                background-color: rgb(205, 252, 255);
+            }
+
+            input
+            {
+                text-align: center;
+            }
+
+            button
+            {
+                width: 100%;
+            }
+        </style>
+        <script>
+            // Funkcje pomocnicze----------------------------------------------]
+            function createArray(length) 
+            {
+                // Utworz macierz.
+                var data = new Array(length || 0), i = length;
+                if (arguments.length > 1)
+                {
+                    var args = Array.prototype.slice.call(arguments, 1);
+                    while(i--)
+                    {
+                        data[length-1 - i] = createArray.apply(this, args);
+                    }
+                }
+                return data;
+            }
+            //------------------------------------------------------------------]
+
+            function Encrypt()
+            {
+                //var c=data.charCodeAt(i)+parseInt(delta);
+                //var nc=String.fromCharCode(c);
+                
+                // 0. Zapisanie danych.
+                var label=document.getElementById("data").value;
+                var pass=document.getElementById("password").value;
+
+                if(label!="" && pass!="")
+                {
+                    // 1. Parametry macierzy z literami.
+                    var delta=0;
+                    var rows=27;
+                    var columns=26;
+                    var matrix=createArray(rows,columns);
+
+                    // 2. Tworzenie macierzy.
+                    for(let i=0;i<rows;i++)
+                    {
+                        for(let j=0;j<columns;j++)
+                        {
+                            var letter='A';
+                            var c=letter.charCodeAt(0)+delta+j;
+                            if(c>90)
+                            {
+                                c-=26;
+                            }
+                            letter=String.fromCharCode(c);
+                            matrix[i][j]=letter;
+                            document.getElementById("content").innerHTML+=letter+" ";
+                        }
+                        document.getElementById("content").innerHTML+="<br>";
+                        delta++;
+                    }
+                    
+                    // 3. Tworzenie klucza.
+                    var key="";
+                    var index=0;
+                    for(let i=0;i<label.length;i++)
+                    {
+                        if(index>=pass.length)
+                        {
+                            index=0;
+                        }
+                        key+=pass[index++];
+                    }
+
+                    // 4. Krzyzowanie.
+                    var offset=65;
+                    var result="";
+                    label=label.toUpperCase();
+                    key=key.toUpperCase();
+                    for(let i=0;i<label.length;i++)
+                    {
+                        var letJ=label.charCodeAt(i)-offset;
+                        var letK=key.charCodeAt(i)-offset;
+                        if(letK==0)
+                        {
+                            letK=26;
+                        }
+                        result+=matrix[letK][letJ]+"";
+                    }
+
+                    document.getElementById("result").value=result;
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <div id="content">
+            <p align="center"><b>Zad.2: Szyfr Vigenere'a</b></p>
+            <p align="center">Tekst: <input type="text" id="data"/></p>
+            <p align="center">Haslo: <input type="text" id="password"/></p>
+            <p align="center">Wynik: <input type="text" id="result" readonly/></p>
+            <button onclick="Encrypt()">Szyfruj</button>
+        </div>
+    </body>
+</html>
