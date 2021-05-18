@@ -7,4 +7,5 @@ See ya :)
 
 **Kalkulator:**
 
-![Kalkulator_Obrazek](https://user-images.githubusercontent.com/72278818/118718869-0ced1a00-b828-11eb-8cb4-9c1eb85ef0c3.png)
+
+![Kalkulator_Obrazek](https://user-images.githubusercontent.com/72278818/118719242-8422ae00-b828-11eb-9802-da33815c0e28.png)
